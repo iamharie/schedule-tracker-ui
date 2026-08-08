@@ -1,12 +1,12 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useCalendarContext } from '../../context/CalendarContext';
 import { IconCalendar, IconList, IconPlus } from '../ui/icons';
 
-export function BottomNav() {
-  const { activeDate } = useCalendarContext();
-  const navigate = useNavigate();
+type BottomNavProps = { onAdd: () => void };
 
+export function BottomNav({ onAdd }: BottomNavProps) {
+  const { activeDate } = useCalendarContext();
   const dayPath = `/day/${format(activeDate, 'yyyy-MM-dd')}`;
 
   return (
@@ -23,11 +23,7 @@ export function BottomNav() {
         <span className="bottom-nav__label">Month</span>
       </NavLink>
 
-      <button
-        className="bottom-nav__fab"
-        onClick={() => navigate('/quick-create')}
-        aria-label="Quick add event"
-      >
+      <button className="bottom-nav__fab" onClick={onAdd} aria-label="Quick add event">
         <IconPlus size={24} />
       </button>
 

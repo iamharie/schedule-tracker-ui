@@ -26,8 +26,6 @@ export default function App() {
             <Route element={<AppShell />}>
               <Route index element={<MonthView />} />
               <Route path="day/:date" element={<DayView />} />
-              {/* quick-create placeholder — Phase 5 will render a bottom sheet */}
-              <Route path="quick-create" element={<Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
