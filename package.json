@@ -1,5 +1,8 @@
 {
   "name": "schedule-tracker-ui",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "private": true,
   "version": "0.0.1",
   "type": "module",
