@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
+import { PasswordField } from '../components/ui/PasswordField';
 
 export default function LoginPage() {
   const { login } = useAuthContext();
@@ -51,24 +52,23 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="auth-field">
-            <label className="auth-field__label" htmlFor="password">Password</label>
-            <input
-              id="password"
-              className="auth-field__input"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordField
+            id="password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="current-password"
+          />
 
           {error && <p className="auth-error" role="alert">{error}</p>}
 
           <button className="auth-btn" type="submit" disabled={loading}>
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
+
+          <p className="auth-forgot">
+            <Link to="/forgot-password" className="auth-link">Forgot password?</Link>
+          </p>
         </form>
 
         <p className="auth-card__footer">

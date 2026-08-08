@@ -1,20 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { gql, useMutation } from '@apollo/client';
-import { PasswordField } from '../components/ui/PasswordField';
 
-const REGISTER_MUTATION = gql`
-  mutation Register($email: String!, $password: String!) {
-    register(email: $email, password: $password)
+const REQUEST_PASSWORD_RESET_MUTATION = gql`
+  mutation RequestPasswordReset($email: String!) {
+    requestPasswordReset(email: $email)
   }
 `;
 
-export default function RegisterPage() {
-  const [registerMutation] = useMutation(REGISTER_MUTATION);
+export default function ForgotPasswordPage() {
+  const [requestPasswordReset] = useMutation(REQUEST_PASSWORD_RESET_MUTATION);
 
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -22,22 +19,12 @@ export default function RegisterPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
-
-    if (password !== confirm) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
     setLoading(true);
     try {
-      await registerMutation({ variables: { email, password } });
+      await requestPasswordReset({ variables: { email } });
       setSuccess(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Registration failed';
+      const msg = err instanceof Error ? err.message : 'Something went wrong';
       setError(msg.replace(/GraphQL error: /i, ''));
     } finally {
       setLoading(false);
@@ -51,7 +38,8 @@ export default function RegisterPage() {
           <div className="auth-success">
             <h2 className="auth-success__title">Check your email</h2>
             <p className="auth-success__body">
-              We sent a verification link to <strong>{email}</strong>. Click it to activate your account.
+              If an account exists for <strong>{email}</strong>, we sent a link to reset your
+              password. It expires in 1 hour.
             </p>
           </div>
           <p className="auth-card__footer">
@@ -67,7 +55,7 @@ export default function RegisterPage() {
       <div className="auth-card">
         <div className="auth-card__header">
           <h1 className="auth-card__title">Schedule Tracker</h1>
-          <p className="auth-card__subtitle">Create your account</p>
+          <p className="auth-card__subtitle">Reset your password</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -85,32 +73,15 @@ export default function RegisterPage() {
             />
           </div>
 
-          <PasswordField
-            id="password"
-            label="Password"
-            value={password}
-            onChange={setPassword}
-            autoComplete="new-password"
-          />
-
-          <PasswordField
-            id="confirm"
-            label="Confirm password"
-            value={confirm}
-            onChange={setConfirm}
-            autoComplete="new-password"
-          />
-
           {error && <p className="auth-error" role="alert">{error}</p>}
 
           <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? 'Sending…' : 'Send reset link'}
           </button>
         </form>
 
         <p className="auth-card__footer">
-          Already have an account?{' '}
-          <Link to="/login" className="auth-link">Sign in</Link>
+          <Link to="/login" className="auth-link">Back to sign in</Link>
         </p>
       </div>
     </div>
