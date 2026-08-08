@@ -4,7 +4,7 @@ import { format, parseISO, isToday, isValid, startOfDay, endOfDay } from 'date-f
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   useSensors,
   useSensor,
@@ -14,6 +14,7 @@ import {
 import { useCalendarContext } from '../context/CalendarContext';
 import { useEvents, type EventData } from '../hooks/useEvents';
 import { useReorder } from '../hooks/useReorder';
+import { useUpdateEventTime } from '../hooks/useMutations';
 import { useZoom } from '../hooks/useZoom';
 import { layoutTimedEvents } from '../lib/layout';
 import { EventBlock, EventGhost } from '../components/event/EventBlock';
@@ -37,6 +38,7 @@ export default function DayView() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const { reorderEvent } = useReorder();
+  const { updateEventTime } = useUpdateEventTime();
   const { hourPx, stepDown, stepUp, atMin, atMax } = useZoom();
 
   const parsedDate = date ? parseISO(date) : new Date();
@@ -47,10 +49,15 @@ export default function DayView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
-  // Scroll to 7am on date change
+  // Scroll to current time when viewing today, 7 AM for other days
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 7 * hourPx;
+    const el = scrollRef.current;
+    if (!el) return;
+    if (isToday(validDate)) {
+      const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+      el.scrollTop = Math.max(0, nowMin * (hourPx / 60) - el.clientHeight / 3);
+    } else {
+      el.scrollTop = 7 * hourPx;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
@@ -92,8 +99,8 @@ export default function DayView() {
     : 'var(--clr-primary)';
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
   );
 
   function handleDragStart({ active }: DragStartEvent) {
@@ -105,23 +112,27 @@ export default function DayView() {
     if (!delta.y) return;
 
     const dragged = timedEvents.find((e) => e.id === active.id);
-    if (!dragged || dragged.isAnchored) return;
+    if (!dragged || dragged.isOccurrence) return;
 
     const rawMin = dragged.startMin + delta.y / minutePx;
     const snappedMin = Math.max(0, Math.min(1439, Math.round(rawMin / 15) * 15));
 
-    const sortable = timedEvents
-      .filter((e) => e.id !== dragged.id && !e.isOccurrence)
-      .sort((a, b) => a.startMin - b.startMin);
+    if (dragged.isAnchored) {
+      // Anchored event: move to an absolute time slot on this day
+      const newStart = new Date(validDate);
+      newStart.setHours(0, snappedMin, 0, 0);
+      updateEventTime(dragged.id, newStart.toISOString());
+    } else {
+      // Flexible event: reorder relative to siblings
+      const sortable = timedEvents
+        .filter((e) => e.id !== dragged.id && !e.isOccurrence)
+        .sort((a, b) => a.startMin - b.startMin);
 
-    const afterEv = [...sortable].reverse().find((e) => e.startMin <= snappedMin);
-    const beforeEv = sortable.find((e) => e.startMin > snappedMin);
+      const afterEv = [...sortable].reverse().find((e) => e.startMin <= snappedMin);
+      const beforeEv = sortable.find((e) => e.startMin > snappedMin);
 
-    reorderEvent({
-      id: dragged.id,
-      afterId: afterEv?.id,
-      beforeId: beforeEv?.id,
-    });
+      reorderEvent({ id: dragged.id, afterId: afterEv?.id, beforeId: beforeEv?.id });
+    }
   }
 
   return (

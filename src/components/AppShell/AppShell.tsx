@@ -5,6 +5,7 @@ import { useCalendarContext, type CalendarSummary } from '../../context/Calendar
 import { TopNav } from './TopNav';
 import { BottomNav } from './BottomNav';
 import { CalendarDrawer } from './CalendarDrawer';
+import { DesktopSidebar } from './DesktopSidebar';
 import { QuickCreate } from '../event/QuickCreate';
 
 const CALENDARS_QUERY = gql`
@@ -35,14 +36,24 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      <TopNav onMenuClick={() => setDrawerOpen(true)} />
+      {/* Persistent sidebar — visible on desktop only (CSS-controlled) */}
+      <DesktopSidebar
+        onAdd={() => setQuickCreateOpen(true)}
+        calendarsLoading={loading}
+      />
 
-      <main className="app-content">
-        <Outlet />
-      </main>
+      {/* Right panel: top nav + content + bottom nav */}
+      <div className="app-main">
+        <TopNav onMenuClick={() => setDrawerOpen(true)} />
 
-      <BottomNav onAdd={() => setQuickCreateOpen(true)} />
+        <main className="app-content">
+          <Outlet />
+        </main>
 
+        <BottomNav onAdd={() => setQuickCreateOpen(true)} />
+      </div>
+
+      {/* Mobile-only slide-out drawer */}
       <CalendarDrawer
         open={drawerOpen}
         loading={loading}

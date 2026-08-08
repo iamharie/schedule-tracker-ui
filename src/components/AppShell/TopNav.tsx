@@ -9,7 +9,7 @@ export function TopNav({ onMenuClick }: TopNavProps) {
 
   return (
     <header className="top-nav">
-      <button className="icon-btn" onClick={onMenuClick} aria-label="Open calendar list">
+      <button className="icon-btn top-nav__menu-btn" onClick={onMenuClick} aria-label="Open calendar list">
         <IconMenu size={22} />
       </button>
 
@@ -31,7 +31,7 @@ export function TopNav({ onMenuClick }: TopNavProps) {
       </div>
 
       {/* spacer to balance the menu button */}
-      <div style={{ width: 40 }} />
+      <div className="top-nav__spacer" style={{ width: 40 }} />
     </header>
   );
 }
