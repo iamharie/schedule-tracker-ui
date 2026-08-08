@@ -40,7 +40,7 @@ function formatDuration(totalMinutes: number): string {
 
 export default function DayView() {
   const { date } = useParams<{ date: string }>();
-  const { goToDate, calendars } = useCalendarContext();
+  const { goToDate } = useCalendarContext();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -111,9 +111,6 @@ export default function DayView() {
   const isEmpty = !loading && events.length === 0;
 
   const activeEvent = activeId ? (timedEvents.find((e) => e.id === activeId) ?? null) : null;
-  const activeColor = activeEvent
-    ? (calendars.find((c) => c.id === activeEvent.calendarId)?.color ?? 'var(--clr-primary)')
-    : 'var(--clr-primary)';
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -250,7 +247,7 @@ export default function DayView() {
 
       <DragOverlay dropAnimation={null}>
         {activeEvent ? (
-          <EventGhost event={activeEvent} color={activeColor} hourPx={hourPx} />
+          <EventGhost event={activeEvent} hourPx={hourPx} />
         ) : null}
       </DragOverlay>
 

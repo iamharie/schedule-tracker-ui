@@ -1,7 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { useDraggable } from '@dnd-kit/core';
-import type { LayoutEvent } from '../../lib/layout';
-import { useCalendarContext } from '../../context/CalendarContext';
+import { PRIORITY_META, type LayoutEvent } from '../../lib/layout';
 import { IconGripVertical } from '../ui/icons';
 
 type EventBlockProps = {
@@ -11,9 +10,9 @@ type EventBlockProps = {
 };
 
 export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
-  const { calendars } = useCalendarContext();
-  const cal = calendars.find((c) => c.id === event.calendarId);
-  const color = cal?.color ?? 'var(--clr-primary)';
+  const meta = PRIORITY_META[event.priority];
+  const color = `var(${meta.varClr})`;
+  const bgColor = `var(${meta.varBg})`;
   const completed = !!event.completedAt;
   const isDraggable = !event.isOccurrence;
 
@@ -57,7 +56,7 @@ export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
         width,
         padding: blockPadding,
         borderLeftColor: color,
-        background: `${color}18`,
+        background: bgColor,
       }}
       onClick={() => onClick(event)}
       {...(isDraggable ? { ...attributes, ...listeners } : {})}
@@ -75,20 +74,19 @@ export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
 
 export function EventGhost({
   event,
-  color,
   hourPx,
 }: {
   event: LayoutEvent;
-  color: string;
   hourPx: number;
 }) {
+  const meta = PRIORITY_META[event.priority];
   const minutePx = hourPx / 60;
   const height = Math.max(event.durationMinutes * minutePx, 24);
   const startLabel = format(parseISO(event.computedStartsAt), 'h:mm a');
   return (
     <div
       className="event-block-ghost"
-      style={{ height, borderLeftColor: color, background: `${color}18` }}
+      style={{ height, borderLeftColor: `var(${meta.varClr})`, background: `var(${meta.varBg})` }}
     >
       <span className="event-block__title">{event.title}</span>
       {height >= 44 && <span className="event-block__time">{startLabel}</span>}

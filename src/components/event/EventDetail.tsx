@@ -3,7 +3,6 @@ import { format, parseISO } from 'date-fns';
 import type { EventData, Priority } from '../../hooks/useEvents';
 import { useDeleteEvent, useToggleComplete, useUpdateEvent } from '../../hooks/useMutations';
 import { useMoveToTomorrow } from '../../hooks/useReorder';
-import { useCalendarContext } from '../../context/CalendarContext';
 import { PRIORITY_META } from '../../lib/layout';
 import {
   IconX,
@@ -28,14 +27,13 @@ const PRIORITIES: { value: Priority; label: string }[] = [
 ];
 
 export function EventDetail({ event, onClose }: EventDetailProps) {
-  const { calendars } = useCalendarContext();
   const { deleteEvent, loading: deleting } = useDeleteEvent();
   const { toggleComplete } = useToggleComplete();
   const { moveToTomorrow, loading: moving } = useMoveToTomorrow();
   const [editing, setEditing] = useState(false);
 
-  const cal = calendars.find((c) => c.id === event.calendarId);
-  const color = cal?.color ?? 'var(--clr-primary)';
+  const meta = PRIORITY_META[event.priority];
+  const color = `var(${meta.varClr})`;
 
   const start = parseISO(event.computedStartsAt);
   const endMs = start.getTime() + event.durationMinutes * 60_000;
@@ -47,7 +45,6 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
 
   const dateLabel = format(start, 'EEEE, MMMM d, yyyy');
 
-  const meta = PRIORITY_META[event.priority];
   const completed = !!event.completedAt;
   const canEdit = !event.isOccurrence;
 
@@ -80,7 +77,7 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
 
         <div className="bottom-sheet__header">
           <div
-            className="bottom-sheet__cal-dot"
+            className="bottom-sheet__priority-dot"
             style={{ background: color }}
             aria-hidden
           />

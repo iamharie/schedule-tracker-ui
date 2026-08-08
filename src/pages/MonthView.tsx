@@ -27,7 +27,7 @@ import {
 import { useCalendarContext } from '../context/CalendarContext';
 import { useEvents, type EventData } from '../hooks/useEvents';
 import { useReorder } from '../hooks/useReorder';
-import { groupByLocalDate } from '../lib/layout';
+import { groupByLocalDate, PRIORITY_META } from '../lib/layout';
 import { EventPill, PILL_DROP_PREFIX } from '../components/event/EventPill';
 import { EventDetail } from '../components/event/EventDetail';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -65,10 +65,10 @@ function DroppableDay({
 
 // Lightweight ghost shown in DragOverlay while dragging
 function PillGhost({ event }: { event: EventData }) {
-  const { calendars } = useCalendarContext();
-  const color = calendars.find((c) => c.id === event.calendarId)?.color ?? 'var(--clr-primary)';
+  const meta = PRIORITY_META[event.priority];
+  const color = `var(${meta.varClr})`;
   return (
-    <div className="event-pill event-pill--ghost" style={{ borderLeftColor: color }}>
+    <div className="event-pill event-pill--ghost" style={{ borderLeftColor: color, background: `var(${meta.varBg})` }}>
       <span className="event-pill__dot" style={{ background: color }} />
       <span className="event-pill__title">{event.title}</span>
     </div>
