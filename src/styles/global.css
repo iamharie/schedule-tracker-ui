@@ -1311,11 +1311,47 @@ ol {
   gap: var(--sp-3);
 }
 
+.day-heading__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
 .day-heading__text {
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   color: var(--clr-text);
-  flex: 1;
+}
+
+.day-heading__totals {
+  font-size: var(--text-xs);
+  color: var(--clr-text-muted);
+}
+
+.day-empty-state {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-5);
+  text-align: center;
+  pointer-events: none;
+}
+
+.day-empty-state__title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--clr-text-muted);
+}
+
+.day-empty-state__hint {
+  font-size: var(--text-sm);
+  color: var(--clr-text-faint);
 }
 
 /* ─── Zoom controls ─────────────────────────────────────────────────────────── */
