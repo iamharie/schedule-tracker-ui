@@ -40,7 +40,9 @@ function bySortOrder(a: EventData, b: EventData): number {
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const WEEKEND = new Set([0, 6]);
-const MAX_PILLS = 3;
+// Rows grow to fit content (see .month-grid__weeks), so this is a genuine
+// "show up to N before falling back to +N" cap, not a fixed-height squeeze.
+const MAX_PILLS = 6;
 
 // Each day cell is a droppable target
 function DroppableDay({

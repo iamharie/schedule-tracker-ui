@@ -809,19 +809,26 @@ ol {
 .month-grid__weeks {
   flex: 1;
   display: grid;
-  /* minmax(0, 1fr), not bare 1fr — a bare 1fr track's automatic minimum is its
-     content's height, so a week with a busy day (3 pills + overflow label)
-     grows taller than a mostly-empty week. minmax(0, ...) forces every week
-     row to the same height; day cells below clip overflow instead. */
-  grid-template-rows: repeat(var(--week-count, 6), minmax(0, 1fr));
+  /* minmax(min-content, 1fr): by default every row gets an equal 1fr share,
+     so a quiet month fills the whole screen edge to edge with even, split
+     rows — no dead space. A row only grows past its fair share when its own
+     content (up to MAX_PILLS pills + the overflow badge) genuinely needs
+     more than that share; the grid then exceeds the viewport and
+     .app-content's existing scroll takes over. Every day column within a
+     row still shares that row's exact height either way (same grid row). */
+  grid-template-rows: repeat(var(--week-count, 6), minmax(min-content, 1fr));
 }
 
 .month-grid__week {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  /* minmax(0, 1fr), not bare 1fr — same fix as the row axis: a bare 1fr
+     column's automatic minimum is its content's width, so an unbreakable
+     long word would grow that one column past its fair 1/7 share (and
+     trigger horizontal scroll) even with word-breaking as a backstop.
+     minmax(0, ...) hard-caps every column to an equal share, always. */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   border-bottom: 1px solid var(--clr-border);
   min-height: 0;
-  overflow: hidden;
 }
 
 .month-grid__week:last-child {
@@ -831,8 +838,7 @@ ol {
 .month-grid__day {
   border-right: 1px solid var(--clr-border);
   padding: var(--sp-1);
-  min-height: 44px; /* touch-target floor only — minmax(0, 1fr) above does the real even-sizing */
-  overflow: hidden;
+  min-height: 44px; /* touch-target floor */
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -936,10 +942,10 @@ ol {
 
 .event-pill {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 4px;
   width: 100%;
-  padding: 1px 4px;
+  padding: 2px 4px;
   border-radius: var(--radius-sm);
   border-left: 3px solid transparent;
   background: var(--clr-surface-raised);
@@ -978,21 +984,36 @@ ol {
 .event-pill__dot {
   width: 6px;
   height: 6px;
+  margin-top: 4px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
 .event-pill__title {
-  font-size: var(--text-xs);
+  font-size: 10px;
   color: var(--clr-text);
-  white-space: nowrap;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.4;
+  /* Flex items default to min-width: auto, which refuses to shrink below the
+     text's natural unwrapped width — without this, long titles overflow the
+     pill horizontally instead of wrapping at all. This is the actual fix;
+     the line-clamp above does nothing without it. */
+  min-width: 0;
+  flex: 1;
+  /* A single long word with no spaces (e.g. "harieeeeeeeeeeee") has no place
+     to break at all by default, so the browser grows the column/row to fit
+     it instead of wrapping. overflow-wrap only breaks mid-word as a last
+     resort when a word truly doesn't fit — normal titles still wrap at
+     spaces first. (word-break: break-word is NOT equivalent here — it
+     breaks mid-word much more eagerly, even when a space wrap would do.) */
+  overflow-wrap: break-word;
 }
 
 .month-grid__overflow {
-  font-size: var(--text-xs);
+  font-size: 10px;
   color: var(--clr-text-muted);
   padding-left: var(--sp-1);
   line-height: 1.4;
