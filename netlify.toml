@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Client-side routing (react-router) — without this, refreshing or deep-linking
+# to any path other than "/" (e.g. /day/2026-08-08, /reset-password?token=...)
+# 404s, since there's no actual file at that path on the server.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
