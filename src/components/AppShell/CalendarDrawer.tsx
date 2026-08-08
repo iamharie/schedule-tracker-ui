@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCalendarContext, type Theme } from '../../context/CalendarContext';
+import { useAuthContext } from '../../context/AuthContext';
 import { IconCheck } from '../ui/icons';
 import { Skeleton } from '../ui/Skeleton';
 
@@ -17,6 +19,14 @@ const THEMES: { value: Theme; label: string }[] = [
 
 export function CalendarDrawer({ open, loading, onClose }: CalendarDrawerProps) {
   const { calendars, selectedIds, toggleCalendar, theme, setTheme } = useCalendarContext();
+  const { user, logout } = useAuthContext();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    onClose();
+    await logout();
+    navigate('/login', { replace: true });
+  }
 
   // Close on Escape
   useEffect(() => {
@@ -76,6 +86,15 @@ export function CalendarDrawer({ open, loading, onClose }: CalendarDrawerProps) 
               ))}
             </div>
           </div>
+
+          {user && (
+            <div className="drawer__account">
+              <span className="drawer__account-email">{user.email}</span>
+              <button className="drawer__logout" onClick={handleLogout}>
+                Sign out
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>

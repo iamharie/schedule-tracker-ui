@@ -1,16 +1,16 @@
 import { format, parseISO } from 'date-fns';
 import { useDraggable } from '@dnd-kit/core';
 import type { LayoutEvent } from '../../lib/layout';
-import { MIN_EVENT_HEIGHT } from '../../lib/layout';
 import { useCalendarContext } from '../../context/CalendarContext';
 import { IconGripVertical } from '../ui/icons';
 
 type EventBlockProps = {
   event: LayoutEvent;
   onClick: (e: LayoutEvent) => void;
+  hourPx: number;
 };
 
-export function EventBlock({ event, onClick }: EventBlockProps) {
+export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
   const { calendars } = useCalendarContext();
   const cal = calendars.find((c) => c.id === event.calendarId);
   const color = cal?.color ?? 'var(--clr-primary)';
@@ -22,8 +22,9 @@ export function EventBlock({ event, onClick }: EventBlockProps) {
     disabled: !isDraggable,
   });
 
-  const top = event.startMin;
-  const height = Math.max(event.durationMinutes, MIN_EVENT_HEIGHT);
+  const minutePx = hourPx / 60;
+  const top = event.startMin * minutePx;
+  const height = Math.max(event.durationMinutes * minutePx, 24);
   const left = `${(event.col / event.totalCols) * 100}%`;
   const width = `calc(${(1 / event.totalCols) * 100}% - 2px)`;
 
@@ -56,8 +57,17 @@ export function EventBlock({ event, onClick }: EventBlockProps) {
   );
 }
 
-export function EventGhost({ event, color }: { event: LayoutEvent; color: string }) {
-  const height = Math.max(event.durationMinutes, MIN_EVENT_HEIGHT);
+export function EventGhost({
+  event,
+  color,
+  hourPx,
+}: {
+  event: LayoutEvent;
+  color: string;
+  hourPx: number;
+}) {
+  const minutePx = hourPx / 60;
+  const height = Math.max(event.durationMinutes * minutePx, 24);
   const startLabel = format(parseISO(event.computedStartsAt), 'h:mm a');
   return (
     <div

@@ -14,7 +14,8 @@ import {
 import { useCalendarContext } from '../context/CalendarContext';
 import { useEvents, type EventData } from '../hooks/useEvents';
 import { useReorder } from '../hooks/useReorder';
-import { layoutTimedEvents, HOUR_PX } from '../lib/layout';
+import { useZoom } from '../hooks/useZoom';
+import { layoutTimedEvents } from '../lib/layout';
 import { EventBlock, EventGhost } from '../components/event/EventBlock';
 import { EventDetail } from '../components/event/EventDetail';
 import type { LayoutEvent } from '../lib/layout';
@@ -36,6 +37,7 @@ export default function DayView() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const { reorderEvent } = useReorder();
+  const { hourPx, stepDown, stepUp, atMin, atMax } = useZoom();
 
   const parsedDate = date ? parseISO(date) : new Date();
   const validDate = isValid(parsedDate) ? parsedDate : new Date();
@@ -45,11 +47,26 @@ export default function DayView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
+  // Scroll to 7am on date change
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = 7 * HOUR_PX;
+      scrollRef.current.scrollTop = 7 * hourPx;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
+
+  // Maintain visible center time when zoom changes
+  const prevHourPxRef = useRef(hourPx);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || prevHourPxRef.current === hourPx) {
+      prevHourPxRef.current = hourPx;
+      return;
+    }
+    const centerMin = (el.scrollTop + el.clientHeight / 2) / (prevHourPxRef.current / 60);
+    el.scrollTop = Math.max(0, centerMin * (hourPx / 60) - el.clientHeight / 2);
+    prevHourPxRef.current = hourPx;
+  }, [hourPx]);
 
   const rangeStart = startOfDay(validDate);
   const rangeEnd = endOfDay(validDate);
@@ -63,17 +80,16 @@ export default function DayView() {
   const showNow = isToday(validDate);
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
+  const minutePx = hourPx / 60;
 
   const heading = isToday(validDate)
     ? `Today · ${format(validDate, 'MMMM d')}`
     : format(validDate, 'EEEE, MMMM d, yyyy');
 
-  // Active drag event + its calendar color
-  const activeEvent = activeId ? timedEvents.find((e) => e.id === activeId) ?? null : null;
-  const activeColor =
-    activeEvent
-      ? (calendars.find((c) => c.id === activeEvent.calendarId)?.color ?? 'var(--clr-primary)')
-      : 'var(--clr-primary)';
+  const activeEvent = activeId ? (timedEvents.find((e) => e.id === activeId) ?? null) : null;
+  const activeColor = activeEvent
+    ? (calendars.find((c) => c.id === activeEvent.calendarId)?.color ?? 'var(--clr-primary)')
+    : 'var(--clr-primary)';
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -91,10 +107,9 @@ export default function DayView() {
     const dragged = timedEvents.find((e) => e.id === active.id);
     if (!dragged || dragged.isAnchored) return;
 
-    const rawMin = dragged.startMin + delta.y;
+    const rawMin = dragged.startMin + delta.y / minutePx;
     const snappedMin = Math.max(0, Math.min(1439, Math.round(rawMin / 15) * 15));
 
-    // Use only real (non-occurrence) events as sort neighbors
     const sortable = timedEvents
       .filter((e) => e.id !== dragged.id && !e.isOccurrence)
       .sort((a, b) => a.startMin - b.startMin);
@@ -132,18 +147,38 @@ export default function DayView() {
         <div className="timeline-scroll" ref={scrollRef}>
           <div className="day-heading">
             <h2 className="day-heading__text">{heading}</h2>
+            <div className="zoom-controls" aria-label="Zoom timeline">
+              <button
+                className="zoom-btn"
+                onClick={stepDown ?? undefined}
+                disabled={atMin}
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
+                −
+              </button>
+              <button
+                className="zoom-btn"
+                onClick={stepUp ?? undefined}
+                disabled={atMax}
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <div
             className="timeline"
-            style={{ height: 24 * HOUR_PX }}
+            style={{ height: 24 * hourPx }}
             aria-label="Day timeline"
           >
             {HOURS.map((h) => (
               <div
                 key={h}
                 className="timeline__hour"
-                style={{ top: h * HOUR_PX }}
+                style={{ top: h * hourPx }}
                 aria-hidden
               >
                 <span className="timeline__hour-label">{formatHour(h)}</span>
@@ -154,7 +189,7 @@ export default function DayView() {
             {showNow && (
               <div
                 className="timeline__now"
-                style={{ top: nowMin }}
+                style={{ top: nowMin * minutePx }}
                 aria-label="Current time"
               />
             )}
@@ -166,6 +201,7 @@ export default function DayView() {
                     <EventBlock
                       key={e.id}
                       event={e}
+                      hourPx={hourPx}
                       onClick={(ev: LayoutEvent) => setSelectedEvent(ev)}
                     />
                   ))}
@@ -175,7 +211,9 @@ export default function DayView() {
       </div>
 
       <DragOverlay dropAnimation={null}>
-        {activeEvent ? <EventGhost event={activeEvent} color={activeColor} /> : null}
+        {activeEvent ? (
+          <EventGhost event={activeEvent} color={activeColor} hourPx={hourPx} />
+        ) : null}
       </DragOverlay>
 
       {selectedEvent && (
