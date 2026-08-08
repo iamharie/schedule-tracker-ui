@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useCalendarContext, type Theme } from '../../context/CalendarContext';
 import { useAuthContext } from '../../context/AuthContext';
-import { IconCalendar, IconList, IconPlus, IconCheck } from '../ui/icons';
+import { IconCalendar, IconList, IconGrid, IconPlus, IconCheck } from '../ui/icons';
 import { Skeleton } from '../ui/Skeleton';
 
 const THEMES: { value: Theme; label: string }[] = [
@@ -51,6 +51,15 @@ export function DesktopSidebar({ onAdd, calendarsLoading }: DesktopSidebarProps)
         >
           <IconList size={17} />
           Day
+        </NavLink>
+        <NavLink
+          to="/year"
+          className={({ isActive }) =>
+            `desktop-sidebar__nav-link${isActive ? ' desktop-sidebar__nav-link--active' : ''}`
+          }
+        >
+          <IconGrid size={17} />
+          Year
         </NavLink>
       </nav>
 
