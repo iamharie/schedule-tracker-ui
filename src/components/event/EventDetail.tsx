@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import type { EventData, Priority } from '../../hooks/useEvents';
 import { useDeleteEvent, useToggleComplete, useUpdateEvent } from '../../hooks/useMutations';
+import { useMoveToTomorrow } from '../../hooks/useReorder';
 import { useCalendarContext } from '../../context/CalendarContext';
 import { PRIORITY_META } from '../../lib/layout';
 import {
@@ -12,6 +13,7 @@ import {
   IconTrash,
   IconCheck,
   IconEdit,
+  IconChevronRight,
 } from '../ui/icons';
 
 type EventDetailProps = {
@@ -29,6 +31,7 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
   const { calendars } = useCalendarContext();
   const { deleteEvent, loading: deleting } = useDeleteEvent();
   const { toggleComplete } = useToggleComplete();
+  const { moveToTomorrow, loading: moving } = useMoveToTomorrow();
   const [editing, setEditing] = useState(false);
 
   const cal = calendars.find((c) => c.id === event.calendarId);
@@ -55,6 +58,11 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
 
   async function handleToggle() {
     await toggleComplete(event.id);
+    onClose();
+  }
+
+  async function handleMoveToTomorrow() {
+    await moveToTomorrow(event);
     onClose();
   }
 
@@ -136,6 +144,16 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
             <IconCheck size={16} />
             {completed ? 'Mark incomplete' : 'Mark complete'}
           </button>
+          {canEdit && (
+            <button
+              className="action-btn action-btn--ghost"
+              onClick={handleMoveToTomorrow}
+              disabled={moving}
+            >
+              <IconChevronRight size={16} />
+              {moving ? 'Moving…' : 'Move to tomorrow'}
+            </button>
+          )}
           <button
             className="action-btn action-btn--danger"
             onClick={handleDelete}

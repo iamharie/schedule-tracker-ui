@@ -30,6 +30,14 @@ function formatHour(h: number) {
   return `${h - 12} PM`;
 }
 
+function formatDuration(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export default function DayView() {
   const { date } = useParams<{ date: string }>();
   const { goToDate, calendars } = useCalendarContext();
@@ -92,6 +100,15 @@ export default function DayView() {
   const heading = isToday(validDate)
     ? `Today · ${format(validDate, 'MMMM d')}`
     : format(validDate, 'EEEE, MMMM d, yyyy');
+
+  const totalMinutes = events
+    .filter((e) => !e.allDay)
+    .reduce((sum, e) => sum + e.durationMinutes, 0);
+  const totalsLabel =
+    events.length > 0
+      ? `${events.length} event${events.length === 1 ? '' : 's'} · ${formatDuration(totalMinutes)} scheduled`
+      : null;
+  const isEmpty = !loading && events.length === 0;
 
   const activeEvent = activeId ? (timedEvents.find((e) => e.id === activeId) ?? null) : null;
   const activeColor = activeEvent
@@ -157,7 +174,10 @@ export default function DayView() {
 
         <div className="timeline-scroll" ref={scrollRef}>
           <div className="day-heading">
-            <h2 className="day-heading__text">{heading}</h2>
+            <div className="day-heading__col">
+              <h2 className="day-heading__text">{heading}</h2>
+              {totalsLabel && <p className="day-heading__totals">{totalsLabel}</p>}
+            </div>
             <div className="zoom-controls" aria-label="Zoom timeline">
               <button
                 className="zoom-btn"
@@ -203,6 +223,13 @@ export default function DayView() {
                 style={{ top: nowMin * minutePx }}
                 aria-label="Current time"
               />
+            )}
+
+            {isEmpty && (
+              <div className="day-empty-state" style={{ top: 7 * hourPx }}>
+                <p className="day-empty-state__title">Nothing scheduled</p>
+                <p className="day-empty-state__hint">Tap + below to add an event</p>
+              </div>
             )}
 
             <div className="timeline__events">
