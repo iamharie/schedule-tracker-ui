@@ -43,17 +43,16 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
     }
   }, [calendars, selectedIds.size]);
 
-  // Apply theme to <html> and persist
+  // Apply theme to <html> and persist. Always set data-theme explicitly (never
+  // remove it) — tokens.css's system-dark media query opts out only on the
+  // literal `data-theme="light"` value, so leaving the attribute absent for
+  // an explicit Light choice let the OS dark preference override it anyway.
   useEffect(() => {
     const html = document.documentElement;
     const dark =
       theme === 'dark' ||
       (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (dark) {
-      html.setAttribute('data-theme', 'dark');
-    } else {
-      html.removeAttribute('data-theme');
-    }
+    html.setAttribute('data-theme', dark ? 'dark' : 'light');
     localStorage.setItem('st-theme', theme);
   }, [theme]);
 
