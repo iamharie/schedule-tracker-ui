@@ -149,6 +149,25 @@ export function IconEdit({ size = 16, className }: IconProps) {
   );
 }
 
+export function IconEye({ size = 18, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function IconEyeOff({ size = 18, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.1A10.6 10.6 0 0 1 12 4.5c6.5 0 10.5 7.5 10.5 7.5a17.6 17.6 0 0 1-3.6 4.6M6.6 6.6C3.8 8.4 1.5 12 1.5 12s4 7.5 10.5 7.5a10.6 10.6 0 0 0 5.4-1.5" />
+      <path d="M9.9 10a3 3 0 0 0 4.2 4.2" />
+    </svg>
+  );
+}
+
 export function IconGripVertical({ size = 16, className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>

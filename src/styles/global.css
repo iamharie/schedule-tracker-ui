@@ -1,4 +1,4 @@
-@import './tokens.css';
+@import "./tokens.css";
 
 /* ─── Reset ────────────────────────────────────────────────────────────────── */
 
@@ -162,7 +162,9 @@ ol {
   font-weight: var(--weight-medium);
   color: var(--clr-text-muted);
   text-decoration: none;
-  transition: background var(--ease-fast), color var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    color var(--ease-fast);
 }
 
 .desktop-sidebar__nav-link:hover {
@@ -361,7 +363,9 @@ ol {
   background: var(--clr-primary);
   color: var(--clr-text-on-primary);
   box-shadow: var(--shadow-md);
-  transition: background var(--ease-fast), transform var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    transform var(--ease-fast);
   /* Sits flush in the bar now, not lifted above it — the floating version
      was getting clipped/overlapped on some mobile browsers. */
 }
@@ -390,7 +394,9 @@ ol {
   height: 40px;
   border-radius: var(--radius-full);
   color: var(--clr-text-muted);
-  transition: background var(--ease-fast), color var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    color var(--ease-fast);
   flex-shrink: 0;
 }
 
@@ -485,7 +491,9 @@ ol {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color var(--ease-fast), background var(--ease-fast);
+  transition:
+    border-color var(--ease-fast),
+    background var(--ease-fast);
 }
 
 .drawer__check--on {
@@ -524,7 +532,9 @@ ol {
   font-weight: var(--weight-medium);
   color: var(--clr-text-muted);
   background: transparent;
-  transition: background var(--ease-fast), color var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    color var(--ease-fast);
 }
 
 .theme-toggle__btn--active {
@@ -560,7 +570,9 @@ ol {
   font-weight: var(--weight-medium);
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--ease-fast), border-color var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    border-color var(--ease-fast);
 }
 
 .drawer__logout:hover {
@@ -646,6 +658,33 @@ ol {
   border-color: var(--clr-primary);
 }
 
+.auth-field__password-wrap {
+  position: relative;
+  display: flex;
+}
+
+.auth-field__input--password {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.auth-field__toggle-visibility {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-text-muted);
+  flex-shrink: 0;
+}
+
+.auth-field__toggle-visibility:hover {
+  color: var(--clr-text);
+}
+
 .auth-error {
   font-size: var(--text-sm);
   color: var(--clr-danger);
@@ -676,6 +715,12 @@ ol {
 .auth-card__footer {
   font-size: var(--text-sm);
   color: var(--clr-text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+.auth-forgot {
+  font-size: var(--text-sm);
   text-align: center;
   margin: 0;
 }
@@ -845,8 +890,12 @@ ol {
 /* ─── Skeleton ─────────────────────────────────────────────────────────────── */
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
@@ -864,13 +913,21 @@ ol {
 /* ─── Animations ───────────────────────────────────────────────────────────── */
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-left {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* ─── Day view ─────────────────────────────────────────────────────────────── */
@@ -944,8 +1001,12 @@ ol {
 /* ─── Bottom sheet ─────────────────────────────────────────────────────────── */
 
 @keyframes slide-up {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .bottom-sheet-overlay {
@@ -1070,7 +1131,9 @@ ol {
   border-radius: var(--radius-lg);
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  transition: background var(--ease-fast), opacity var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    opacity var(--ease-fast);
 }
 
 .action-btn:disabled {
@@ -1203,22 +1266,25 @@ ol {
   font-weight: var(--weight-medium);
   color: var(--clr-text-muted);
   background: transparent;
-  transition: border-color var(--ease-fast), color var(--ease-fast), background var(--ease-fast);
+  transition:
+    border-color var(--ease-fast),
+    color var(--ease-fast),
+    background var(--ease-fast);
 }
 
-.priority-chip--active[data-priority='HIGH'] {
+.priority-chip--active[data-priority="HIGH"] {
   border-color: var(--clr-priority-high);
   color: var(--clr-priority-high);
   background: var(--clr-priority-high-bg);
 }
 
-.priority-chip--active[data-priority='MEDIUM'] {
+.priority-chip--active[data-priority="MEDIUM"] {
   border-color: var(--clr-priority-medium);
   color: var(--clr-priority-medium);
   background: var(--clr-priority-medium-bg);
 }
 
-.priority-chip--active[data-priority='NICE_TO_DO'] {
+.priority-chip--active[data-priority="NICE_TO_DO"] {
   border-color: var(--clr-priority-nice);
   color: var(--clr-priority-nice);
   background: var(--clr-priority-nice-bg);
@@ -1383,7 +1449,9 @@ ol {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--ease-fast), border-color var(--ease-fast);
+  transition:
+    background var(--ease-fast),
+    border-color var(--ease-fast);
 }
 
 .zoom-btn:hover:not(:disabled) {
@@ -1439,7 +1507,7 @@ ol {
 }
 
 .timeline__now::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -4px;
   top: -3px;
@@ -1469,7 +1537,9 @@ ol {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  transition: filter var(--ease-fast), opacity var(--ease-fast);
+  transition:
+    filter var(--ease-fast),
+    opacity var(--ease-fast);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;

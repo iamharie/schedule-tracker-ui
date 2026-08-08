@@ -1,18 +1,19 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { gql, useMutation } from '@apollo/client';
 import { PasswordField } from '../components/ui/PasswordField';
 
-const REGISTER_MUTATION = gql`
-  mutation Register($email: String!, $password: String!) {
-    register(email: $email, password: $password)
+const RESET_PASSWORD_MUTATION = gql`
+  mutation ResetPassword($token: String!, $newPassword: String!) {
+    resetPassword(token: $token, newPassword: $newPassword)
   }
 `;
 
-export default function RegisterPage() {
-  const [registerMutation] = useMutation(REGISTER_MUTATION);
+export default function ResetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') ?? '';
+  const [resetPassword] = useMutation(RESET_PASSWORD_MUTATION);
 
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
@@ -34,14 +35,32 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      await registerMutation({ variables: { email, password } });
+      await resetPassword({ variables: { token, newPassword: password } });
       setSuccess(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Registration failed';
+      const msg = err instanceof Error ? err.message : 'Failed to reset password';
       setError(msg.replace(/GraphQL error: /i, ''));
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!token) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="auth-error-block">
+            <h2 className="auth-error-block__title">Invalid link</h2>
+            <p className="auth-error-block__body">
+              No reset token found in the link. Request a new one below.
+            </p>
+          </div>
+          <p className="auth-card__footer">
+            <Link to="/forgot-password" className="auth-link">Request a new link</Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (success) {
@@ -49,13 +68,13 @@ export default function RegisterPage() {
       <div className="auth-page">
         <div className="auth-card">
           <div className="auth-success">
-            <h2 className="auth-success__title">Check your email</h2>
+            <h2 className="auth-success__title">Password updated</h2>
             <p className="auth-success__body">
-              We sent a verification link to <strong>{email}</strong>. Click it to activate your account.
+              Your password has been reset. Sign in with your new password.
             </p>
           </div>
           <p className="auth-card__footer">
-            <Link to="/login" className="auth-link">Back to sign in</Link>
+            <Link to="/login" className="auth-link">Go to sign in</Link>
           </p>
         </div>
       </div>
@@ -67,27 +86,13 @@ export default function RegisterPage() {
       <div className="auth-card">
         <div className="auth-card__header">
           <h1 className="auth-card__title">Schedule Tracker</h1>
-          <p className="auth-card__subtitle">Create your account</p>
+          <p className="auth-card__subtitle">Choose a new password</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          <div className="auth-field">
-            <label className="auth-field__label" htmlFor="email">Email</label>
-            <input
-              id="email"
-              className="auth-field__input"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
           <PasswordField
             id="password"
-            label="Password"
+            label="New password"
             value={password}
             onChange={setPassword}
             autoComplete="new-password"
@@ -95,7 +100,7 @@ export default function RegisterPage() {
 
           <PasswordField
             id="confirm"
-            label="Confirm password"
+            label="Confirm new password"
             value={confirm}
             onChange={setConfirm}
             autoComplete="new-password"
@@ -104,13 +109,12 @@ export default function RegisterPage() {
           {error && <p className="auth-error" role="alert">{error}</p>}
 
           <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? 'Updating…' : 'Update password'}
           </button>
         </form>
 
         <p className="auth-card__footer">
-          Already have an account?{' '}
-          <Link to="/login" className="auth-link">Sign in</Link>
+          <Link to="/login" className="auth-link">Back to sign in</Link>
         </p>
       </div>
     </div>
