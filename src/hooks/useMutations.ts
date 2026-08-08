@@ -1,6 +1,18 @@
 import { gql, useMutation, useApolloClient } from '@apollo/client';
 import type { Priority } from './useEvents';
 
+const UPDATE_EVENT_MUTATION = gql`
+  mutation UpdateEvent($id: ID!, $input: UpdateEventInput!) {
+    updateEvent(id: $id, input: $input) {
+      id
+      startsAt
+      computedStartsAt
+      isAnchored
+      sortOrder
+    }
+  }
+`;
+
 const QUICK_CREATE_MUTATION = gql`
   mutation QuickCreateEvent($input: QuickCreateEventInput!) {
     quickCreateEvent(input: $input) {
@@ -62,6 +74,18 @@ export function useDeleteEvent() {
   }
 
   return { deleteEvent, loading: state.loading };
+}
+
+export function useUpdateEventTime() {
+  const client = useApolloClient();
+  const [mutate] = useMutation(UPDATE_EVENT_MUTATION);
+
+  async function updateEventTime(id: string, startsAt: string) {
+    await mutate({ variables: { id, input: { startsAt } } });
+    await client.refetchQueries({ include: 'active' });
+  }
+
+  return { updateEventTime };
 }
 
 export function useToggleComplete() {

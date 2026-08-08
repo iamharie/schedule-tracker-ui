@@ -80,6 +80,203 @@ ol {
   background: var(--clr-bg);
 }
 
+/* Right-hand column that holds top-nav + content + bottom-nav */
+.app-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Desktop sidebar (hidden on mobile) ───────────────────────────────────── */
+
+.desktop-sidebar {
+  display: none;
+}
+
+/* ─── Desktop breakpoint (≥768px) ──────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .app-shell {
+    flex-direction: row;
+  }
+
+  /* Show persistent sidebar */
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    flex-shrink: 0;
+    height: 100dvh;
+    background: var(--clr-surface);
+    border-right: 1px solid var(--clr-border);
+    overflow: hidden;
+  }
+
+  /* Hide mobile-only navigation */
+  .bottom-nav,
+  .top-nav__menu-btn,
+  .top-nav__spacer,
+  .drawer-overlay,
+  .drawer {
+    display: none !important;
+  }
+
+  /* Top nav sits flush at the top of the right panel */
+  .top-nav {
+    border-bottom: 1px solid var(--clr-border);
+  }
+}
+
+/* ─── Desktop sidebar internals ─────────────────────────────────────────────── */
+
+.desktop-sidebar__brand {
+  padding: var(--sp-5) var(--sp-4) var(--sp-4);
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.desktop-sidebar__brand-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--clr-primary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.desktop-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3);
+}
+
+.desktop-sidebar__nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  transition: background var(--ease-fast), color var(--ease-fast);
+}
+
+.desktop-sidebar__nav-link:hover {
+  background: var(--clr-surface-raised);
+  color: var(--clr-text);
+}
+
+.desktop-sidebar__nav-link--active {
+  background: var(--clr-primary-subtle);
+  color: var(--clr-primary-text);
+}
+
+.desktop-sidebar__add {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: var(--sp-1) var(--sp-3) var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  background: var(--clr-primary);
+  color: var(--clr-text-on-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  border: none;
+  cursor: pointer;
+  transition: background var(--ease-fast);
+}
+
+.desktop-sidebar__add:hover {
+  background: var(--clr-primary-hover);
+}
+
+.desktop-sidebar__section-label {
+  padding: var(--sp-3) var(--sp-4) var(--sp-1);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.desktop-sidebar__cals {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0 var(--sp-3);
+  margin: 0;
+}
+
+.desktop-sidebar__cal-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.desktop-sidebar__cal-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  color: var(--clr-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--ease-fast);
+}
+
+.desktop-sidebar__cal-btn:hover {
+  background: var(--clr-surface-raised);
+}
+
+.desktop-sidebar__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.desktop-sidebar__cal-name {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.desktop-sidebar__footer {
+  padding: var(--sp-4);
+  border-top: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.desktop-sidebar__account {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.desktop-sidebar__email {
+  flex: 1;
+  font-size: var(--text-xs);
+  color: var(--clr-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ─── Top nav ──────────────────────────────────────────────────────────────── */
 
 .top-nav {
@@ -600,6 +797,12 @@ ol {
   background: var(--clr-surface-raised);
 }
 
+.month-grid__day--drop-target {
+  background: var(--clr-surface-raised);
+  outline: 2px solid var(--clr-primary);
+  outline-offset: -2px;
+}
+
 .month-grid__day--other-month .month-grid__day-num {
   color: var(--clr-text-faint);
 }
@@ -679,6 +882,23 @@ ol {
   text-align: left;
   min-height: 18px;
   overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.event-pill--draggable {
+  cursor: grab;
+}
+
+.event-pill--dragging {
+  opacity: 0.35;
+  cursor: grabbing;
+}
+
+.event-pill--ghost {
+  cursor: grabbing;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0.95;
 }
 
 .event-pill--done .event-pill__title {
@@ -1247,6 +1467,13 @@ ol {
 .event-block:hover .drag-handle,
 .event-block--dragging .drag-handle {
   opacity: 0.7;
+}
+
+/* On touch devices the drag handle is always visible since there is no hover */
+@media (hover: none) {
+  .event-block--draggable .drag-handle {
+    opacity: 0.5;
+  }
 }
 
 /* ─── Drag overlay ghost ────────────────────────────────────────────────────── */

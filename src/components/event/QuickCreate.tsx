@@ -21,7 +21,7 @@ export function QuickCreate({ onClose }: QuickCreateProps) {
   const [title, setTitle] = useState('');
   const [time, setTime] = useState(format(new Date(), 'HH:mm'));
   const [priority, setPriority] = useState<Priority>('MEDIUM');
-  const [isAnchored, setIsAnchored] = useState(true);
+  const [isAnchored, setIsAnchored] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -40,7 +40,28 @@ export function QuickCreate({ onClose }: QuickCreateProps) {
     if (!title.trim()) { setError('Title is required'); return; }
 
     const dateStr = format(activeDate, 'yyyy-MM-dd');
-    const startsAt = isAnchored ? `${dateStr}T${time}:00.000Z` : undefined;
+    let startsAt: string;
+    if (isAnchored) {
+      // Build startsAt in LOCAL time so "09:00" means 9 AM in the user's
+      // timezone, not 9 AM UTC. activeDate is midnight local of the selected day.
+      const [hours, minutes] = time.split(':').map(Number);
+      const local = new Date(activeDate);
+      local.setHours(hours, minutes, 0, 0);
+      startsAt = local.toISOString();
+    } else {
+      // For flexible events, use current time as initial position so the event
+      // appears near "now" in the timeline rather than at midnight.
+      const now = new Date();
+      const todayStr = format(now, 'yyyy-MM-dd');
+      if (dateStr === todayStr) {
+        startsAt = now.toISOString();
+      } else {
+        // For another day, use 9 AM local time of that day
+        const d = new Date(activeDate);
+        d.setHours(9, 0, 0, 0);
+        startsAt = d.toISOString();
+      }
+    }
 
     try {
       await quickCreate({

@@ -15,7 +15,7 @@ export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
   const cal = calendars.find((c) => c.id === event.calendarId);
   const color = cal?.color ?? 'var(--clr-primary)';
   const completed = !!event.completedAt;
-  const isDraggable = !event.isAnchored && !event.isOccurrence;
+  const isDraggable = !event.isOccurrence;
 
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: event.id,
