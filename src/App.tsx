@@ -1,24 +1,38 @@
-import { gql, useQuery } from '@apollo/client';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { CalendarProvider } from './context/CalendarContext';
+import { AppShell } from './components/AppShell/AppShell';
+import { Skeleton } from './components/ui/Skeleton';
 
-const HEALTH_QUERY = gql`
-  query Health {
-    health
-  }
-`;
+const MonthView = lazy(() => import('./pages/MonthView'));
+const DayView = lazy(() => import('./pages/DayView'));
+
+function PageFallback() {
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {Array.from({ length: 6 }, (_, i) => (
+        <Skeleton key={i} height={80} borderRadius="8px" />
+      ))}
+    </div>
+  );
+}
 
 export default function App() {
-  const { data, loading, error } = useQuery<{ health: string }>(HEALTH_QUERY);
-
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '2rem' }}>
-      <h1>Schedule Tracker</h1>
-      {loading && <p>Connecting to API...</p>}
-      {error && <p style={{ color: 'red' }}>API error: {error.message}</p>}
-      {data && (
-        <p style={{ color: 'green' }}>
-          API status: {data.health}
-        </p>
-      )}
-    </div>
+    <BrowserRouter>
+      <CalendarProvider>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<MonthView />} />
+              <Route path="day/:date" element={<DayView />} />
+              {/* quick-create placeholder — Phase 5 will render a bottom sheet */}
+              <Route path="quick-create" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </CalendarProvider>
+    </BrowserRouter>
   );
 }
