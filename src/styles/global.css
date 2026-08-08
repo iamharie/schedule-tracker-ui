@@ -901,6 +901,11 @@ ol {
   opacity: 0.95;
 }
 
+.event-pill--drop-target {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: -1px;
+}
+
 .event-pill--done .event-pill__title {
   text-decoration: line-through;
   opacity: 0.5;
@@ -1126,6 +1131,22 @@ ol {
 
 .qc-title-input--error {
   border-bottom-color: var(--clr-danger);
+}
+
+.qc-textarea {
+  font-size: var(--text-base);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-base);
+  resize: vertical;
+  min-height: 60px;
+  font-family: var(--font-sans);
+}
+
+.qc-time-range {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
 }
 
 .qc-error {

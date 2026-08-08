@@ -5,8 +5,13 @@ const UPDATE_EVENT_MUTATION = gql`
   mutation UpdateEvent($id: ID!, $input: UpdateEventInput!) {
     updateEvent(id: $id, input: $input) {
       id
+      title
+      notes
+      location
       startsAt
       computedStartsAt
+      durationMinutes
+      priority
       isAnchored
       sortOrder
     }
@@ -86,6 +91,28 @@ export function useUpdateEventTime() {
   }
 
   return { updateEventTime };
+}
+
+export type EditableEventInput = {
+  title: string;
+  notes?: string | null;
+  location?: string | null;
+  startsAt?: string;
+  durationMinutes?: number;
+  priority: Priority;
+  isAnchored: boolean;
+};
+
+export function useUpdateEvent() {
+  const client = useApolloClient();
+  const [mutate, state] = useMutation(UPDATE_EVENT_MUTATION);
+
+  async function updateEvent(id: string, input: EditableEventInput) {
+    await mutate({ variables: { id, input } });
+    await client.refetchQueries({ include: 'active' });
+  }
+
+  return { updateEvent, loading: state.loading };
 }
 
 export function useToggleComplete() {

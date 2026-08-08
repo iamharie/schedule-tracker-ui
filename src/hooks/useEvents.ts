@@ -60,5 +60,12 @@ export function useEvents(start: Date, end: Date) {
     variables: { start: start.toISOString(), end: end.toISOString(), calendarIds },
     errorPolicy: 'ignore',
     skip: calendars.length > 0 && selectedIds.size === 0,
+    // Month/day views mount fresh on every navigation with the same variables
+    // as a prior visit; cache-first would silently serve stale data from
+    // before a mutation made elsewhere (e.g. create an event in Day view, then
+    // navigate to Month view without it ever having been an "active" query
+    // during that mutation's refetch). cache-and-network still paints
+    // instantly from cache, then reconciles from the network.
+    fetchPolicy: 'cache-and-network',
   });
 }
