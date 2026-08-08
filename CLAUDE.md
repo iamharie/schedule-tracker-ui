@@ -23,7 +23,9 @@ Generated files land in `src/gql/` (gitignored). CI must run codegen before buil
 
 ## API connection
 
-API URL comes from `VITE_API_URL` env var — never hardcoded. Apollo Client sends `credentials: 'include'` on every request so httpOnly session cookies are transmitted cross-origin.
+`src/lib/apolloClient.ts` resolves the GraphQL URI in this order: explicit `VITE_API_URL` env var if set → in dev, the page's own host on port 4000 (so opening the app via a LAN IP for phone testing reaches the right backend without editing env vars per-IP) → in production, a same-origin relative `/graphql` path, proxied to Railway by `netlify.toml`. Apollo Client sends `credentials: 'include'` on every request so httpOnly session cookies are transmitted.
+
+The production default is same-origin **on purpose**, not just a convenience: iOS (Safari and Chrome — same WebKit engine) blocks/partitions cross-site cookies via Intelligent Tracking Prevention even with correct `SameSite=None; Secure` attributes. Calling Railway directly from the Netlify-hosted page broke login on iOS specifically (worked on desktop Chrome) until this proxy was added. See the README's Deployment section before changing this.
 
 ## Mobile-first rules
 

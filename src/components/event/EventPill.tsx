@@ -1,6 +1,6 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import type { EventData } from '../../hooks/useEvents';
-import { useCalendarContext } from '../../context/CalendarContext';
+import { PRIORITY_META } from '../../lib/layout';
 
 type EventPillProps = {
   event: EventData;
@@ -13,9 +13,9 @@ type EventPillProps = {
 export const PILL_DROP_PREFIX = 'pill:';
 
 export function EventPill({ event, onClick }: EventPillProps) {
-  const { calendars } = useCalendarContext();
-  const cal = calendars.find((c) => c.id === event.calendarId);
-  const color = cal?.color ?? 'var(--clr-primary)';
+  const meta = PRIORITY_META[event.priority];
+  const color = `var(${meta.varClr})`;
+  const bgColor = `var(${meta.varBg})`;
   const completed = !!event.completedAt;
   const isDraggable = !event.isOccurrence;
 
@@ -43,7 +43,7 @@ export function EventPill({ event, onClick }: EventPillProps) {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ borderLeftColor: color }}
+      style={{ borderLeftColor: color, background: completed ? undefined : bgColor }}
       {...(isDraggable ? { ...attributes, ...listeners } : {})}
       onClick={() => onClick(event)}
       aria-label={event.title}

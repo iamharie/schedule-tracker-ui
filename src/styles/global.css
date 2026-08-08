@@ -1048,7 +1048,7 @@ ol {
   padding: var(--sp-2) var(--sp-4) var(--sp-3);
 }
 
-.bottom-sheet__cal-dot {
+.bottom-sheet__priority-dot {
   width: 10px;
   height: 10px;
   border-radius: var(--radius-full);
