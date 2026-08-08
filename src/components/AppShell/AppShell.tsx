@@ -5,6 +5,7 @@ import { useCalendarContext, type CalendarSummary } from '../../context/Calendar
 import { TopNav } from './TopNav';
 import { BottomNav } from './BottomNav';
 import { CalendarDrawer } from './CalendarDrawer';
+import { QuickCreate } from '../event/QuickCreate';
 
 const CALENDARS_QUERY = gql`
   query Calendars {
@@ -21,10 +22,10 @@ type CalendarsData = { calendars: CalendarSummary[] };
 
 export function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
   const { setCalendars } = useCalendarContext();
 
   const { data, loading } = useQuery<CalendarsData>(CALENDARS_QUERY, {
-    // If the user isn't logged in the server returns [] — no error to handle
     errorPolicy: 'ignore',
   });
 
@@ -40,13 +41,17 @@ export function AppShell() {
         <Outlet />
       </main>
 
-      <BottomNav />
+      <BottomNav onAdd={() => setQuickCreateOpen(true)} />
 
       <CalendarDrawer
         open={drawerOpen}
         loading={loading}
         onClose={() => setDrawerOpen(false)}
       />
+
+      {quickCreateOpen && (
+        <QuickCreate onClose={() => setQuickCreateOpen(false)} />
+      )}
     </div>
   );
 }
