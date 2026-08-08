@@ -2,6 +2,19 @@
   command = "npm run build"
   publish = "dist"
 
+# Proxy the API through this same origin instead of calling Railway directly.
+# Auth cookies are httpOnly + SameSite=None for cross-site use, but iOS Safari
+# (and Chrome on iOS, same WebKit engine) blocks/partitions cross-site cookies
+# via Intelligent Tracking Prevention even with correct attributes. Proxying
+# makes the request same-origin from the browser's point of view, so the
+# cookie is first-party and none of that applies. Must come before the SPA
+# catch-all below — redirects are matched in order, first match wins.
+[[redirects]]
+  from = "/graphql"
+  to = "https://schedule-tracker-domain-production.up.railway.app/graphql"
+  status = 200
+  force = true
+
 # Client-side routing (react-router) — without this, refreshing or deep-linking
 # to any path other than "/" (e.g. /day/2026-08-08, /reset-password?token=...)
 # 404s, since there's no actual file at that path on the server.
