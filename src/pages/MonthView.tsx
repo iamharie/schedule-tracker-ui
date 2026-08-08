@@ -26,11 +26,17 @@ import {
 } from '@dnd-kit/core';
 import { useCalendarContext } from '../context/CalendarContext';
 import { useEvents, type EventData } from '../hooks/useEvents';
-import { useUpdateEventTime } from '../hooks/useMutations';
+import { useReorder } from '../hooks/useReorder';
 import { groupByLocalDate } from '../lib/layout';
-import { EventPill } from '../components/event/EventPill';
+import { EventPill, PILL_DROP_PREFIX } from '../components/event/EventPill';
 import { EventDetail } from '../components/event/EventDetail';
 import { Skeleton } from '../components/ui/Skeleton';
+
+const DAY_DROP_PREFIX = 'drop-';
+
+function bySortOrder(a: EventData, b: EventData): number {
+  return a.sortOrder < b.sortOrder ? -1 : a.sortOrder > b.sortOrder ? 1 : 0;
+}
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const WEEKEND = new Set([0, 6]);
@@ -46,7 +52,7 @@ function DroppableDay({
   className: string;
   children: React.ReactNode;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `drop-${dateKey}` });
+  const { setNodeRef, isOver } = useDroppable({ id: `${DAY_DROP_PREFIX}${dateKey}` });
   return (
     <div
       ref={setNodeRef}
@@ -75,7 +81,7 @@ export default function MonthView() {
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const { updateEventTime } = useUpdateEventTime();
+  const { reorderEvent } = useReorder();
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -93,6 +99,15 @@ export default function MonthView() {
   const allEvents = data?.events ?? [];
 
   const eventsByDay = useMemo(() => groupByLocalDate(allEvents), [allEvents]);
+
+  // Pills within a day are ordered by sortOrder (the same fractional index
+  // driving day-view reorder), not by time — the whole point of the drag
+  // handle here is to let events be arranged freely, independent of clock time.
+  const sortedEventsByDay = useMemo(() => {
+    const map = new Map<string, EventData[]>();
+    for (const [key, list] of eventsByDay) map.set(key, [...list].sort(bySortOrder));
+    return map;
+  }, [eventsByDay]);
 
   const activeEvent = activeId ? (allEvents.find((e) => e.id === activeId) ?? null) : null;
 
@@ -113,20 +128,47 @@ export default function MonthView() {
     if (!over) return;
 
     const eventId = active.id as string;
-    const targetDateKey = (over.id as string).replace('drop-', '');
     const moved = allEvents.find((e) => e.id === eventId);
     if (!moved) return;
 
-    // No-op if dropped on the same day
-    const currentDateKey = format(parseISO(moved.computedStartsAt), 'yyyy-MM-dd');
-    if (currentDateKey === targetDateKey) return;
+    const overId = over.id as string;
 
-    // Preserve time-of-day, change date
-    const originalStart = parseISO(moved.startsAt);
-    const targetDate = parseISO(targetDateKey);
-    const newStart = new Date(targetDate);
-    newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
-    updateEventTime(eventId, newStart.toISOString());
+    let targetDateKey: string;
+    let beforeEv: EventData | undefined;
+
+    if (overId.startsWith(PILL_DROP_PREFIX)) {
+      const targetId = overId.slice(PILL_DROP_PREFIX.length);
+      if (targetId === eventId) return; // dropped on itself — no-op
+      const targetEv = allEvents.find((e) => e.id === targetId);
+      if (!targetEv) return;
+      targetDateKey = format(parseISO(targetEv.computedStartsAt), 'yyyy-MM-dd');
+      beforeEv = targetEv;
+    } else if (overId.startsWith(DAY_DROP_PREFIX)) {
+      targetDateKey = overId.slice(DAY_DROP_PREFIX.length);
+      beforeEv = undefined; // dropped on empty cell space — append to end of day
+    } else {
+      return;
+    }
+
+    // Insert immediately before beforeEv (or at the end, if none), among the
+    // target day's siblings — dragging always reorders by position, never by time.
+    const siblings = (sortedEventsByDay.get(targetDateKey) ?? []).filter((e) => e.id !== eventId);
+    const beforeIndex = beforeEv ? siblings.findIndex((e) => e.id === beforeEv!.id) : siblings.length;
+    const afterEv = beforeIndex > 0 ? siblings[beforeIndex - 1] : undefined;
+
+    // Only touch startsAt when actually crossing days — keep the event's own
+    // time-of-day, converted through local time (never assume a UTC offset).
+    const currentDateKey = format(parseISO(moved.computedStartsAt), 'yyyy-MM-dd');
+    let startsAt: string | undefined;
+    if (currentDateKey !== targetDateKey) {
+      const originalStart = parseISO(moved.startsAt);
+      const targetDate = parseISO(targetDateKey);
+      const newStart = new Date(targetDate);
+      newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
+      startsAt = newStart.toISOString();
+    }
+
+    reorderEvent({ id: eventId, afterId: afterEv?.id, beforeId: beforeEv?.id, startsAt });
   }
 
   return (
@@ -152,9 +194,7 @@ export default function MonthView() {
                   const today = isToday(day);
                   const selected = isSameDay(day, activeDate);
                   const dateKey = format(day, 'yyyy-MM-dd');
-                  const dayEvents = (eventsByDay.get(dateKey) ?? []).sort((a, b) =>
-                    a.computedStartsAt.localeCompare(b.computedStartsAt),
-                  );
+                  const dayEvents = sortedEventsByDay.get(dateKey) ?? [];
                   const overflow = Math.max(0, dayEvents.length - MAX_PILLS);
 
                   let cls = 'month-grid__day';
