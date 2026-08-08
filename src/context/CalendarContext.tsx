@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { addMonths, subMonths } from 'date-fns';
+import { addMonths, subMonths, addYears, subYears } from 'date-fns';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -14,6 +14,8 @@ type CalendarContextValue = {
   activeDate: Date;
   prevMonth: () => void;
   nextMonth: () => void;
+  prevYear: () => void;
+  nextYear: () => void;
   goToToday: () => void;
   goToDate: (d: Date) => void;
 
@@ -58,6 +60,8 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
 
   const prevMonth = useCallback(() => setActiveDate((d) => subMonths(d, 1)), []);
   const nextMonth = useCallback(() => setActiveDate((d) => addMonths(d, 1)), []);
+  const prevYear = useCallback(() => setActiveDate((d) => subYears(d, 1)), []);
+  const nextYear = useCallback(() => setActiveDate((d) => addYears(d, 1)), []);
   const goToToday = useCallback(() => setActiveDate(new Date()), []);
   const goToDate = useCallback((d: Date) => setActiveDate(d), []);
 
@@ -77,6 +81,8 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       activeDate,
       prevMonth,
       nextMonth,
+      prevYear,
+      nextYear,
       goToToday,
       goToDate,
       calendars,
@@ -86,7 +92,20 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       theme,
       setTheme,
     }),
-    [activeDate, prevMonth, nextMonth, goToToday, goToDate, calendars, selectedIds, toggleCalendar, theme, setTheme],
+    [
+      activeDate,
+      prevMonth,
+      nextMonth,
+      prevYear,
+      nextYear,
+      goToToday,
+      goToDate,
+      calendars,
+      selectedIds,
+      toggleCalendar,
+      theme,
+      setTheme,
+    ],
   );
 
   return <CalendarContext.Provider value={value}>{children}</CalendarContext.Provider>;

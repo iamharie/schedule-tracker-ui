@@ -7,6 +7,7 @@ import { Skeleton } from './components/ui/Skeleton';
 
 const MonthView = lazy(() => import('./pages/MonthView'));
 const DayView = lazy(() => import('./pages/DayView'));
+const YearView = lazy(() => import('./pages/YearView'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
@@ -66,6 +67,7 @@ export default function App() {
                 <Route element={<AppShell />}>
                   <Route index element={<MonthView />} />
                   <Route path="day/:date" element={<DayView />} />
+                  <Route path="year" element={<YearView />} />
                 </Route>
               </Route>
 
