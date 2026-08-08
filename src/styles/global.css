@@ -764,13 +764,19 @@ ol {
 .month-grid__weeks {
   flex: 1;
   display: grid;
-  grid-template-rows: repeat(var(--week-count, 6), 1fr);
+  /* minmax(0, 1fr), not bare 1fr — a bare 1fr track's automatic minimum is its
+     content's height, so a week with a busy day (3 pills + overflow label)
+     grows taller than a mostly-empty week. minmax(0, ...) forces every week
+     row to the same height; day cells below clip overflow instead. */
+  grid-template-rows: repeat(var(--week-count, 6), minmax(0, 1fr));
 }
 
 .month-grid__week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   border-bottom: 1px solid var(--clr-border);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .month-grid__week:last-child {
@@ -780,7 +786,8 @@ ol {
 .month-grid__day {
   border-right: 1px solid var(--clr-border);
   padding: var(--sp-1);
-  min-height: 80px;
+  min-height: 44px; /* touch-target floor only — minmax(0, 1fr) above does the real even-sizing */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1499,6 +1506,21 @@ ol {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+}
+
+/* Zoomed-in (90/120 px per hour): bigger text, roomier handle hit-area — see
+   EventBlock's `roomy` prop for the padding/icon-size half of this. */
+.event-block--roomy .event-block__title {
+  font-size: var(--text-sm);
+}
+
+.event-block--roomy .event-block__time {
+  font-size: var(--text-xs);
+}
+
+.event-block--roomy .drag-handle {
+  top: 3px;
+  right: 4px;
 }
 
 .event-block__time {

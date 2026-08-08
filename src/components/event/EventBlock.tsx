@@ -31,6 +31,13 @@ export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
   const startLabel = format(parseISO(event.computedStartsAt), 'h:mm a');
   const short = height < 44;
 
+  // Zooming in should make blocks easier to grab, not just taller — bigger
+  // padding and a bigger grip icon give a larger, more precise drag target
+  // without touching the column-width math (which reflects real overlaps).
+  const roomy = hourPx >= 90;
+  const handleSize = hourPx >= 120 ? 16 : hourPx >= 90 ? 14 : hourPx >= 60 ? 12 : 10;
+  const blockPadding = hourPx >= 90 ? '4px var(--sp-3)' : hourPx >= 60 ? '3px var(--sp-2)' : '2px var(--sp-2)';
+
   return (
     <div
       ref={setNodeRef}
@@ -39,10 +46,19 @@ export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
         completed ? 'event-block--done' : '',
         isDragging ? 'event-block--dragging' : '',
         isDraggable ? 'event-block--draggable' : '',
+        roomy ? 'event-block--roomy' : '',
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ top, height, left, width, borderLeftColor: color, background: `${color}18` }}
+      style={{
+        top,
+        height,
+        left,
+        width,
+        padding: blockPadding,
+        borderLeftColor: color,
+        background: `${color}18`,
+      }}
       onClick={() => onClick(event)}
       {...(isDraggable ? { ...attributes, ...listeners } : {})}
     >
@@ -50,7 +66,7 @@ export function EventBlock({ event, onClick, hourPx }: EventBlockProps) {
       {!short && <span className="event-block__time">{startLabel}</span>}
       {isDraggable && (
         <span className="drag-handle" aria-hidden>
-          <IconGripVertical size={10} />
+          <IconGripVertical size={handleSize} />
         </span>
       )}
     </div>
