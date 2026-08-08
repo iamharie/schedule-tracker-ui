@@ -44,14 +44,22 @@ const WEEKEND = new Set([0, 6]);
 // "show up to N before falling back to +N" cap, not a fixed-height squeeze.
 const MAX_PILLS = 6;
 
-// Each day cell is a droppable target
+// Each day cell is a droppable target. Tapping anywhere in it that isn't the
+// day-number button or a pill (i.e. the empty space — always present even on
+// a full 6-pill day, since cells never shrink below their padding) selects
+// the day without navigating, so the bottom FAB can create an event there
+// directly. This is a plain click handler, unrelated to the drag machinery
+// (drags only ever originate from a pill's own useDraggable, never from the
+// cell itself), so it can't interfere with dragging.
 function DroppableDay({
   dateKey,
   className,
+  onClick,
   children,
 }: {
   dateKey: string;
   className: string;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `${DAY_DROP_PREFIX}${dateKey}` });
@@ -59,6 +67,7 @@ function DroppableDay({
     <div
       ref={setNodeRef}
       className={`${className}${isOver ? ' month-grid__day--drop-target' : ''}`}
+      onClick={onClick}
     >
       {children}
     </div>
@@ -205,10 +214,18 @@ export default function MonthView() {
                   else if (selected) cls += ' month-grid__day--selected';
 
                   return (
-                    <DroppableDay key={day.toISOString()} dateKey={dateKey} className={cls}>
+                    <DroppableDay
+                      key={day.toISOString()}
+                      dateKey={dateKey}
+                      className={cls}
+                      onClick={() => goToDate(day)}
+                    >
                       <button
                         className="month-grid__day-num"
-                        onClick={() => handleDayClick(day)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDayClick(day);
+                        }}
                         aria-label={format(day, 'EEEE, MMMM d, yyyy')}
                         aria-current={today ? 'date' : undefined}
                       >
