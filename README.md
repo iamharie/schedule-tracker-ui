@@ -1,6 +1,15 @@
 # schedule-tracker-ui
 
-React frontend for Schedule Tracker — a mobile-first calendar web app.
+React frontend for Schedule Tracker — a mobile-first calendar web app. Pairs with the `schedule-tracker-domain` API repo; never a monorepo. Designed to be installed as a standalone app via Safari's "Add to Home Screen" (iOS) / "Add to Dock" (macOS), not just used as a browser tab — see CLAUDE.md's "PWA / installed-app considerations" before changing auth or refresh behavior.
+
+## Features
+
+- Month view (drag-reorder pills, tap empty space to create an event directly, priority-colored pills), Day view (timeline with zoom, same drag-reorder), Year view (tap a month to zoom in)
+- Auth: register/verify-email/login/logout/forgot-password/reset-password, all with a show/hide toggle on password fields
+- Light/dark/system theming
+- Manual refresh button (top nav) — there's no realtime sync, see CLAUDE.md
+
+See CLAUDE.md for the architecture decisions and non-obvious bugs/fixes behind these — several of the above (drag-reorder correctness, theme switching, month-grid layout, iOS login) have real history worth reading before changing them.
 
 ## Stack
 
@@ -29,9 +38,7 @@ App: `http://localhost:5173`
 
 ## Codegen
 
-GraphQL TypeScript types are **generated, never hand-maintained**. Run `npm run codegen` after any API schema change. The API must be running when you run codegen (it introspects the live schema).
-
-Generated files land in `src/gql/` which is gitignored. CI runs codegen before the build step so a breaking schema change fails the build rather than surfacing at runtime.
+GraphQL TypeScript types are **meant to be generated, never hand-maintained** — that's the intent, but in the current codebase every hook hand-writes its own TypeScript types alongside raw `gql` tags, and nothing actually imports the generated output. Running `npm run codegen` still works (it introspects the live API schema, landing files in the gitignored `src/gql/`), but it's not currently wired into anything — there's no CI step consuming it either. See CLAUDE.md before assuming a schema change will be caught automatically; right now it won't be.
 
 ## Other commands
 
